@@ -1,35 +1,31 @@
 #!/usr/bin/env bash
 
-VPX_AS=${FAM_AS}
+VPX_AS="${FAM_AS}"
 
 case $ANDROID_ABI in
-  x86)
-    EXTRA_BUILD_FLAGS="--target=x86-android-gcc --disable-sse4_1 --disable-avx --disable-avx2 --disable-avx512"
-    VPX_AS=${FAM_YASM}
-    ;;
   x86_64)
-    EXTRA_BUILD_FLAGS="--target=x86_64-android-gcc --disable-avx --disable-avx2 --disable-avx512"
-    VPX_AS=${FAM_YASM}
+    EXTRA_BUILD_FLAGS="--target=x86_64-linux-gcc --disable-avx --disable-avx2 --disable-avx512"
+    VPX_AS="${FAM_YASM}"
     ;;
   armeabi-v7a)
-    EXTRA_BUILD_FLAGS="--target=armv7-android-gcc --enable-thumb --disable-neon"
+    EXTRA_BUILD_FLAGS="--target=armv7-linux-gcc --enable-thumb --disable-neon"
     ;;
   arm64-v8a)
-    EXTRA_BUILD_FLAGS="--target=arm64-android-gcc --enable-thumb"
+    EXTRA_BUILD_FLAGS="--target=arm64-linux-gcc --enable-thumb"
     ;;
 esac
 
-CC=${FAM_CC} \
-CXX=${FAM_CXX} \
-AR=${FAM_AR} \
-LD=${FAM_LD} \
-AS=${VPX_AS} \
-STRIP=${FAM_STRIP} \
-NM=${FAM_NM} \
+CC="${FAM_CC}" \
+CXX="${FAM_CXX}" \
+AR="${FAM_AR}" \
+LD="${FAM_LD}" \
+AS="${VPX_AS}" \
+STRIP="${FAM_STRIP}" \
+NM="${FAM_NM}" \
 ./configure \
     ${EXTRA_BUILD_FLAGS} \
-    --prefix=${INSTALL_DIR} \
-    --libc=${SYSROOT_PATH} \
+    --prefix="${INSTALL_DIR}" \
+    --libc="${SYSROOT_PATH}" \
     --enable-pic \
     --enable-realtime-only \
     --enable-install-libs \
@@ -58,6 +54,6 @@ NM=${FAM_NM} \
     --disable-encode-perf-tests \
     --disable-runtime-cpu-detect  || exit 1
 
-${MAKE_EXECUTABLE} clean
-${MAKE_EXECUTABLE} -j${HOST_NPROC}
-${MAKE_EXECUTABLE} install
+"${MAKE_EXECUTABLE}" clean
+"${MAKE_EXECUTABLE}" -j"${HOST_NPROC}"
+"${MAKE_EXECUTABLE}" install
