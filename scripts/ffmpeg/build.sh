@@ -31,6 +31,7 @@ DEP_LD_FLAGS="-L\"${BUILD_DIR_EXTERNAL}/${ANDROID_ABI}/lib\" ${FFMPEG_EXTRA_LD_F
 # HarmonyOS specific flags
 EXTRA_LDFLAGS="-fuse-ld=lld ${DEP_LD_FLAGS}"
 
+echo "Configuring FFmpeg"
 ./configure \
   --prefix="${BUILD_DIR_FFMPEG}/${ANDROID_ABI}" \
   --enable-cross-compile \

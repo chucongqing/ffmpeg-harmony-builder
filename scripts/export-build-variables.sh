@@ -6,7 +6,7 @@ export ANDROID_ABI=$1
 export ANDROID_PLATFORM=1
 
 export TOOLCHAIN_PATH=${OHOS_NDK_HOME}/native/llvm
-export SYSROOT_PATH=${TOOLCHAIN_PATH}/sysroot
+export SYSROOT_PATH=${OHOS_NDK_HOME}/native/sysroot
 
 COMPILER_PREFIX=
 CPU_FAMILY=
