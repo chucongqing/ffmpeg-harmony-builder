@@ -79,9 +79,13 @@ Intermediate build artifacts are stored in:
 ./build/ffmpeg/<abi>/
 ```
 
+## Tested Status
+
+- **FFmpeg** (without external libraries) — ✅ **Successfully compiled and tested** on HarmonyOS NDK.
+- **External libraries** — ⚠️ The build scripts for external libraries have been updated to use the HarmonyOS toolchain, but **they have not been fully tested**. If you enable libraries with `--enable-libopus`, `--enable-libx264`, etc., you may encounter compilation errors. Please test them yourself and adjust configure/CMake flags as needed.
+
 ## Limitations
 
-- **External libraries are not yet supported**. Flags like `--enable-libopus` or `--enable-libx264` will not work because the dependency build scripts still reference the Android NDK toolchain.
 - Path spaces in `OHOS_NDK_HOME` are supported at the shell-script level, but placing the project directory itself under a path with spaces may still cause issues in upstream Makefiles.
 
 ## Thanks to
