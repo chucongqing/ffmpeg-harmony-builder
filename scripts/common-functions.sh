@@ -17,17 +17,17 @@ function downloadTarArchive() {
   echo "Ensuring sources of ${LIBRARY_NAME} in ${LIBRARY_SOURCES}"
 
   if [[ ! -d "$LIBRARY_SOURCES" ]]; then
-    curl -LO ${DOWNLOAD_URL}
+    curl -LO "${DOWNLOAD_URL}"
 
     EXTRACTION_DIR="."
     if [ "$NEED_EXTRA_DIRECTORY" = true ] ; then
-      EXTRACTION_DIR=${LIBRARY_SOURCES}
-      mkdir ${EXTRACTION_DIR}
+      EXTRACTION_DIR="${LIBRARY_SOURCES}"
+      mkdir "${EXTRACTION_DIR}"
     fi
 
-    tar xf ${ARCHIVE_NAME} -C ${EXTRACTION_DIR}
-    rm ${ARCHIVE_NAME}
+    tar xf "${ARCHIVE_NAME}" -C "${EXTRACTION_DIR}"
+    rm "${ARCHIVE_NAME}"
   fi
 
-  export SOURCES_DIR_${LIBRARY_NAME}=$(pwd)/${LIBRARY_SOURCES}
+  export SOURCES_DIR_${LIBRARY_NAME}="$(pwd)/${LIBRARY_SOURCES}"
 }

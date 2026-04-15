@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script parses arguments that were passed to ffmpeg-android-maker.sh
+# This script parses arguments that were passed to ffmpeg-harmony-builder.sh
 # and exports a bunch of varables that are used elsewhere.
 
 # Local variables with default values (except ABIS_TO_BUILD).
@@ -140,10 +140,8 @@ for argument in "$@"; do
 done
 
 # if ABIS_TO_BUILD list is empty, then fill it with all supported ABIs
-# The x86 is the first, because it is more likely to have Text Relocations.
-# In this case the rest ABIs will not be assembled at all.
 if [ ${#ABIS_TO_BUILD[@]} -eq 0 ]; then
-  ABIS_TO_BUILD=("x86" "x86_64" "armeabi-v7a" "arm64-v8a")
+  ABIS_TO_BUILD=("arm64-v8a" "armeabi-v7a" "x86_64")
 fi
 # The FFmpeg will be build for ABIs in this list
 export FFMPEG_ABIS_TO_BUILD=${ABIS_TO_BUILD[@]}
@@ -156,6 +154,5 @@ export FFMPEG_SOURCE_VALUE=$SOURCE_VALUE
 # Elements from this list are used for strings substitution
 export FFMPEG_EXTERNAL_LIBRARIES=${EXTERNAL_LIBRARIES[@]}
 
-# Desired Android API level to use during compilation
-# Will be replaced with 21 for 64bit ABIs if the value is less than 21
+# Desired API level to use during compilation (kept for compatibility)
 export DESIRED_ANDROID_API_LEVEL=${API_LEVEL}

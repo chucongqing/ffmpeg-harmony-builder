@@ -9,7 +9,7 @@
 # Getting sources of a particular FFmpeg release.
 # Same argument (FFmpeg version) produces the same source set.
 function ensureSourcesTar() {
-  source ${SCRIPTS_DIR}/common-functions.sh
+  source "${SCRIPTS_DIR}/common-functions.sh"
 
   downloadTarArchive \
     "ffmpeg" \
@@ -25,26 +25,26 @@ function ensureSourcesGit() {
 
   GIT_DIRECTORY=ffmpeg-git
 
-  FFMPEG_SOURCES=$(pwd)/${GIT_DIRECTORY}
+  FFMPEG_SOURCES="$(pwd)/${GIT_DIRECTORY}"
 
   if [[ ! -d "$FFMPEG_SOURCES" ]]; then
-    git clone https://git.ffmpeg.org/ffmpeg.git ${GIT_DIRECTORY}
+    git clone https://git.ffmpeg.org/ffmpeg.git "${GIT_DIRECTORY}"
   fi
 
-  cd ${GIT_DIRECTORY}
+  cd "${GIT_DIRECTORY}"
   git reset --hard
 
-  git checkout $NAME_TO_CHECKOUT
-  if [ ${FFMPEG_SOURCE_TYPE} = "GIT_BRANCH" ]; then
+  git checkout "$NAME_TO_CHECKOUT"
+  if [ "${FFMPEG_SOURCE_TYPE}" = "GIT_BRANCH" ]; then
     # Forcing the update of a branch
-    git pull origin $BRANCH
+    git pull origin "$BRANCH"
   fi
 
   # Additional logging to keep track of an exact commit to build
   echo "Commit to build:"
   git rev-parse HEAD
 
-  export SOURCES_DIR_ffmpeg=${FFMPEG_SOURCES}
+  export SOURCES_DIR_ffmpeg="${FFMPEG_SOURCES}"
 }
 
 # Actual code

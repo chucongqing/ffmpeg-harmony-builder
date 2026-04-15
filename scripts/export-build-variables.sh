@@ -1,49 +1,34 @@
 #!/usr/bin/env bash
 
-function max() {
-  [ $1 -ge $2 ] && echo "$1" || echo "$2"
-}
-
 export ANDROID_ABI=$1
 
-if [ $ANDROID_ABI = "arm64-v8a" ] || [ $ANDROID_ABI = "x86_64" ] ; then
-  # For 64bit we use value not less than 21
-  export ANDROID_PLATFORM=$(max ${DESIRED_ANDROID_API_LEVEL} 21)
-else
-  export ANDROID_PLATFORM=${DESIRED_ANDROID_API_LEVEL}
-fi
+# HarmonyOS doesn't use API level in compiler wrappers like Android does.
+export ANDROID_PLATFORM=1
 
-export TOOLCHAIN_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/${HOST_TAG}
+export TOOLCHAIN_PATH=${OHOS_NDK_HOME}/native/llvm
 export SYSROOT_PATH=${TOOLCHAIN_PATH}/sysroot
 
-TARGET_TRIPLE_MACHINE_CC=
+COMPILER_PREFIX=
 CPU_FAMILY=
-export TARGET_TRIPLE_OS="android"
 
 case $ANDROID_ABI in
   armeabi-v7a)
-    #cc       armv7a-linux-androideabi16-clang
     export TARGET_TRIPLE_MACHINE_ARCH=arm
-    TARGET_TRIPLE_MACHINE_CC=armv7a
-    export TARGET_TRIPLE_OS=androideabi
+    COMPILER_PREFIX=armv7-unknown-linux-ohos
+    export TARGET=arm-linux-ohos
     ;;
   arm64-v8a)
-    #cc       aarch64-linux-android21-clang
     export TARGET_TRIPLE_MACHINE_ARCH=aarch64
-    ;;
-  x86)
-    #cc       i686-linux-android16-clang
-    export TARGET_TRIPLE_MACHINE_ARCH=i686
-    CPU_FAMILY=x86
+    COMPILER_PREFIX=aarch64-unknown-linux-ohos
+    export TARGET=aarch64-linux-ohos
     ;;
   x86_64)
-    #cc       x86_64-linux-android21-clang
     export TARGET_TRIPLE_MACHINE_ARCH=x86_64
+    COMPILER_PREFIX=x86_64-unknown-linux-ohos
+    export TARGET=x86_64-linux-ohos
+    CPU_FAMILY=x86_64
     ;;
 esac
-
-# If the cc-specific variable isn't set, we fallback to binutils version
-[ -z "${TARGET_TRIPLE_MACHINE_CC}" ] && TARGET_TRIPLE_MACHINE_CC=${TARGET_TRIPLE_MACHINE_ARCH}
 
 [ -z "${CPU_FAMILY}" ] && CPU_FAMILY=${TARGET_TRIPLE_MACHINE_ARCH}
 export CPU_FAMILY=$CPU_FAMILY
@@ -65,15 +50,9 @@ export      FAM_SIZE=${CROSS_PREFIX_WITH_PATH}size
 export   FAM_STRINGS=${CROSS_PREFIX_WITH_PATH}strings
 export     FAM_STRIP=${CROSS_PREFIX_WITH_PATH}strip
 
-export TARGET=${TARGET_TRIPLE_MACHINE_CC}-linux-${TARGET_TRIPLE_OS}${ANDROID_PLATFORM}
-# The name for compiler is slightly different, so it is defined separately.
-export FAM_CC=${TOOLCHAIN_PATH}/bin/${TARGET}-clang
-export FAM_CXX=${FAM_CC}++
+export FAM_CC=${TOOLCHAIN_PATH}/bin/${COMPILER_PREFIX}-clang
+export FAM_CXX=${TOOLCHAIN_PATH}/bin/${COMPILER_PREFIX}-clang++
 export FAM_LD=${FAM_CC}
-
-# TODO consider abondaning this strategy of defining the name of the clang wrapper
-# in favour of just passing -mstackrealign and -fno-addrsig depending on
-# ANDROID_ABI, ANDROID_PLATFORM and NDK's version
 
 # Special variable for the yasm assembler
 export FAM_YASM=${TOOLCHAIN_PATH}/bin/yasm

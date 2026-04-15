@@ -1,79 +1,62 @@
-#!/bin/bash
-#file:build_ohos.sh
-# ohos编译安装ffmpeg
+#!/usr/bin/env bash
 
-# --- sdk路径配置 (请根据实际环境修改) ---
-OHOS_SDK="/root/ohos-sdk/linux"
+case $ANDROID_ABI in
+  x86)
+    # Disabling assembler optimizations, because they have text relocations
+    EXTRA_BUILD_CONFIGURATION_FLAGS="$EXTRA_BUILD_CONFIGURATION_FLAGS --disable-asm"
+    ;;
+  x86_64)
+    EXTRA_BUILD_CONFIGURATION_FLAGS="$EXTRA_BUILD_CONFIGURATION_FLAGS --x86asmexe=\"${NASM_EXECUTABLE}\""
+    ;;
+  arm64-v8a)
+    EXTRA_BUILD_CONFIGURATION_FLAGS="$EXTRA_BUILD_CONFIGURATION_FLAGS --cpu=armv8-a"
+    ;;
+esac
 
-COMPILER_TOOLCHAIN=${OHOS_SDK}/native/llvm/bin/
+if [ "$FFMPEG_GPL_ENABLED" = true ] ; then
+    EXTRA_BUILD_CONFIGURATION_FLAGS="$EXTRA_BUILD_CONFIGURATION_FLAGS --enable-gpl"
+fi
 
-BUILD_OS=$(uname)
+# Preparing flags for enabling requested libraries
+ADDITIONAL_COMPONENTS=
+for LIBARY_NAME in ${FFMPEG_EXTERNAL_LIBRARIES[@]}
+do
+  ADDITIONAL_COMPONENTS+=" --enable-$LIBARY_NAME"
+done
 
-SYSROOT=${OHOS_SDK}/native/sysroot
-PKG_CONFIG_SYSROOT_DIR=${SYSROOT}/usr/lib/aarch64-linux-ohos
-PKG_CONFIG_PATH=${PKG_CONFIG_SYSROOT_DIR}
-PKG_CONFIG_EXECUTABLE=${PKG_CONFIG_SYSROOT_DIR}
+# Referencing dependencies without pkgconfig
+DEP_CFLAGS="-I\"${BUILD_DIR_EXTERNAL}/${ANDROID_ABI}/include\""
+DEP_LD_FLAGS="-L\"${BUILD_DIR_EXTERNAL}/${ANDROID_ABI}/lib\" ${FFMPEG_EXTRA_LD_FLAGS}"
 
-TARGET="aarch64-linux-ohos"
-
-LIB_PATH="$SYSROOT/usr/lib/$TARGET"
-
-HNP_PUBLIC_PATH=/data/service/hnp/
-FFMPEG_INSTALL_HNP_PATH=${HNP_PUBLIC_PATH}/ffmpeg.org/ffmpeg_8.0.1
-
-WORK_ROOT=${PWD}
-ARCHIVE_PATH=${WORK_ROOT}/output
-
-HNP_TOOL=${OHOS_SDK}/toolchains/hnpcli
-
-make clean
-
-mkdir -p ${HNP_PUBLIC_PATH}
-mkdir -p ${FFMPEG_INSTALL_HNP_PATH}
-mkdir -p ${ARCHIVE_PATH}
-
-chmod 777  -R  ${HNP_PUBLIC_PATH}
+# HarmonyOS specific flags
+EXTRA_LDFLAGS="-fuse-ld=lld ${DEP_LD_FLAGS}"
 
 ./configure \
-  --prefix=${FFMPEG_INSTALL_HNP_PATH} \
+  --prefix="${BUILD_DIR_FFMPEG}/${ANDROID_ABI}" \
   --enable-cross-compile \
   --target-os=linux \
-  --arch=aarch64 \
-  --cpu=armv8-a \
-  \
-  --host-cc=gcc \
-  --cc="$COMPILER_TOOLCHAIN/clang" \
-  --cxx="$COMPILER_TOOLCHAIN/clang++" \
-  --as="$COMPILER_TOOLCHAIN/clang" \
-  --nm="$COMPILER_TOOLCHAIN/llvm-nm" \
-  --ar="$COMPILER_TOOLCHAIN/llvm-ar" \
-  --ranlib="$COMPILER_TOOLCHAIN/llvm-ranlib" \
-  --strip="$COMPILER_TOOLCHAIN/llvm-strip" \
-  \
-  --sysroot="$SYSROOT" \
-  --extra-cflags="--target=$TARGET -fPIC -D__MUSL__=1 -D__OHOS__  -fstack-protector-strong" \
-  --extra-ldflags="--target=$TARGET --sysroot=$SYSROOT -fuse-ld=lld -L$LIB_PATH" \
-  \
+  --arch="${TARGET_TRIPLE_MACHINE_ARCH}" \
+  --sysroot="${SYSROOT_PATH}" \
+  --cc="${FAM_CC}" \
+  --cxx="${FAM_CXX}" \
+  --ld="${FAM_LD}" \
+  --ar="${FAM_AR}" \
+  --as="${FAM_CC}" \
+  --nm="${FAM_NM}" \
+  --ranlib="${FAM_RANLIB}" \
+  --strip="${FAM_STRIP}" \
+  --extra-cflags="-O3 -fPIC -D__MUSL__ -fstack-protector-strong ${DEP_CFLAGS}" \
+  --extra-ldflags="${EXTRA_LDFLAGS}" \
   --enable-shared \
   --disable-static \
-  --disable-asm \
-  --disable-doc \
-  --enable-ffmpeg \
+  --disable-vulkan \
   --disable-ffplay \
   --disable-ffprobe \
-  --enable-pic \
-  --enable-gpl \
-  --enable-nonfree \
-  --disable-logging\
-  --disable-vulkan \
-  --disable-libdrm 
+  --enable-ffmpeg \
+  --pkg-config="${PKG_CONFIG_EXECUTABLE}" \
+  ${EXTRA_BUILD_CONFIGURATION_FLAGS} \
+  ${ADDITIONAL_COMPONENTS} || exit 1
 
-make VERBOSE=1 -j$(nproc) 
-make install
-
-# 生成鸿蒙HNP软件包
-cp hnp.json ${FFMPEG_INSTALL_HNP_PATH}/
-pushd ${FFMPEG_INSTALL_HNP_PATH}/../
-    ${HNP_TOOL} pack -i ${FFMPEG_INSTALL_HNP_PATH} -o ${ARCHIVE_PATH}/
-    tar -zvcf ${ARCHIVE_PATH}/ohos_ffmpeg_8.0.1.tar.gz ffmpeg_8.0.1/
-popd
+"${MAKE_EXECUTABLE}" clean
+"${MAKE_EXECUTABLE}" -j"${HOST_NPROC}"
+"${MAKE_EXECUTABLE}" install

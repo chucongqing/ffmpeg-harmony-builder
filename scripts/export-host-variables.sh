@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 # Defining a toolchain directory's name according to the current OS.
-# Assume that proper version of NDK is installed
-# and is referenced by ANDROID_NDK_HOME environment variable
 case "$OSTYPE" in
   darwin*)  HOST_TAG="darwin-x86_64" ;;
   linux*)   HOST_TAG="linux-x86_64" ;;
@@ -25,10 +23,10 @@ export HOST_TAG=$HOST_TAG
 # Number of physical cores in the system to facilitate parallel assembling
 export HOST_NPROC=$HOST_NPROC
 
-# Using CMake from the Android SDK
+# Using system CMake
 export CMAKE_EXECUTABLE=$(which cmake)
-# Using Make from the Android SDK
-export MAKE_EXECUTABLE=${ANDROID_NDK_HOME}/prebuilt/${HOST_TAG}/bin/make
+# Using system Make
+export MAKE_EXECUTABLE=$(which make)
 # Using Build machine's Ninja. It is used for libdav1d building. Needs to be installed
 export NINJA_EXECUTABLE=$(which ninja)
 # Meson is used for libdav1d building. Needs to be installed

@@ -10,7 +10,7 @@ function checkVariablePresence() {
 }
 
 checkVariablePresence "OHOS_SDK_HOME" \
-  "The variable should be set to the actual Android SDK path" || exit 1
+  "The variable should be set to the actual HarmonyOS SDK path" || exit 1
 
 checkVariablePresence "OHOS_NDK_HOME" \
-  "The variable should be set to the actual Android NDK path" || exit 1
+  "The variable should be set to the actual HarmonyOS NDK path" || exit 1
