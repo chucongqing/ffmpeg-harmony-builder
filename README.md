@@ -21,6 +21,14 @@ export OHOS_NDK_HOME=/path/to/ohos-ndk
 
 > **Note**: `OHOS_NDK_HOME` is the path that contains the `native/llvm` and `native/sysroot` directories. `OHOS_SDK_HOME` is only checked for presence and is not actively used when building FFmpeg without external libraries.
 
+### Recommended: use the CMake bundled with the NDK
+
+It is recommended to use the CMake provided by the HarmonyOS NDK to avoid toolchain compatibility issues. You can temporarily prepend it to `PATH` before building:
+
+```bash
+export PATH="${OHOS_NDK_HOME}/native/build-tools/cmake/bin:${PATH}"
+```
+
 ## Usage
 
 ### Build FFmpeg for a single ABI
